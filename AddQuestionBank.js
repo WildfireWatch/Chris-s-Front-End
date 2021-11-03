@@ -51,7 +51,7 @@ const AddQuestionBank = (props) => {
           data.append("userId", localStorage.getItem("userId"));
     
           await axios
-            .post(SERVER_ADDRESS + "save-topic", data, {
+            .post(SERVER_ADDRESS + "save-questionbank", data, {
               headers: {
                 Authorization: "Bearer " + authToken,
               },
@@ -82,6 +82,15 @@ const AddQuestionBank = (props) => {
           setTeaserValid(false);
         }
         setTeaser(event.target.value);
+      };
+
+      const questionBankNameHandler = (event) => {
+        if (event.target.value.length > 0) {
+          setTeaserValid(true);
+        } else {
+          setTeaserValid(false);
+        }
+        setQuestionBankName(event.target.value);
       };
 
       return (
@@ -123,6 +132,7 @@ const AddQuestionBank = (props) => {
                       required
                       type="text"
                       key="topicNameInputKey"
+                      onBlur={questionBankNameHandler}
                     />
                   </Form.Group>
     
