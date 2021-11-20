@@ -240,6 +240,31 @@ exports.postSaveCourse = (req, res, next) => {
     });
 };
 
+exports.postSaveBankQuestions = (req, res, next) => {
+  const QuestionText = req.body.QuestionText;
+  const correct = req.body.correct;
+  const distractor1 = req.body.distractor1;
+  const distractor2 = req.body.distractor2;
+  const distractor3 = req.body.distractor3;
+  QuestionFromBank.create({
+    text: QuestionText,
+    correct: correct,
+    distractor1: distractor1,
+    distractor2: distractor2,
+    distractor3: distractor3
+  })
+  .then(() => {
+    res.send(true);
+  })
+    .catch((err) => {
+      console.log(err);
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
+};
+
 exports.postSaveQuestionBank = (req, res, next) => {
   const QuestionBankName = req.body.questionBankName;
   const teaser = req.body.teaser;
@@ -281,6 +306,20 @@ exports.postSaveExCourse = (req, res, next) => {
       next(err);
     });
 };
+
+exports.getQuestionBanks = (req, res, next) => {
+  QuestionBank.findAll().then((questionbanks) => {
+    res.send(questionbanks);
+  });
+};
+
+exports.getQuestionList = (req, res, next) => {
+  QuestionFromBank.findAll().then((questionbanks) => {
+    res.send(questionbanks);
+  });
+};
+
+
 
 exports.getCourses = (req, res, next) => {
   Course.findAll().then((courses) => {

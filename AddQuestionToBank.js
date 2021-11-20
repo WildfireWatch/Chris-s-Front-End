@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import axios from "axios";
 
 import Domain from "../Domain";
@@ -16,6 +16,8 @@ import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import Tooltip from "react-bootstrap/Tooltip";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+
+
 
 import { useAuth } from "../../../context/auth";
 import { Redirect } from "react-router";
@@ -36,6 +38,14 @@ const AddQuestionToBank = (props) => {
     const [alertMessage, setAlertMessage] = useState("");
     const [teaser, setTeaser] = useState();
     const [teaserValid, setTeaserValid] = useState(false);
+    const [fields, setFields] = useState([{
+      id:1,
+      questionText: "",
+      correctAnswer: "",
+      distractor1: "",
+      distractor2: "",
+      distractor3: "", 
+    }])
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -50,7 +60,7 @@ const AddQuestionToBank = (props) => {
           setOverlayActive(true);
           const data = new FormData();
     
-          data.append("questionText", QuestionText);
+          data.append("QuestionText", QuestionText);
           data.append("correct", correct);
           data.append("distractor1", distractor1);
           data.append("distractor2", distractor2);
@@ -58,7 +68,7 @@ const AddQuestionToBank = (props) => {
           data.append("userId", localStorage.getItem("userId"));
     
           await axios
-            .post(SERVER_ADDRESS + "save-questionbank", data, {
+            .post(SERVER_ADDRESS + "save-bankquestions", data, {
               headers: {
                 Authorization: "Bearer " + authToken,
               },
@@ -82,6 +92,16 @@ const AddQuestionToBank = (props) => {
         }
 
       };
+
+      const handleAdd = (id) => {
+        setFields([...fields, {id:id + 2, questionText: "", correctAnswer: "", distractor1: "", distractor2: "", distractor3: ""}])
+      }
+
+      const handleSubtract = (i) => {
+        const values = [...fields]
+        values.splice(i, 1)
+        setFields([...values])
+      }
 
       const distractor1Handler = (event) => {
         if (event.target.value.length > 0) {
@@ -138,6 +158,14 @@ const AddQuestionToBank = (props) => {
         setQuestionText(event.target.value);
       };
 
+
+    const handleChangeInput = (i, e) => {
+      console.log(e.target.value)
+      const values = [...fields]
+      values[i][e.target.name] = e.target.value
+      setFields(values)
+    }
+
       return (
         <LoadingOverlay
           active={isOverlayActive}
@@ -154,107 +182,152 @@ const AddQuestionToBank = (props) => {
               <Navbar />
     
               <Form validated={validated} onSubmit={handleSubmit}>
+                {fields.map((field, i) => (
+                  //<div key={field.id}></div>
+                  <div key={field.id}>
                 <Form.Row className="justify-content-md-center">
                   <ErrorAlert
                     showAlert={displayErrorAlert}
                     AlertMessage={alertMessage}
                   ></ErrorAlert>
                 </Form.Row>
+              
                 <Form.Row>
-                  <Form.Group
+                <Form.Group
                    as={Col}
-                   sm={4}
+                   sm={11}
                    controlId="validationCustom01"
                    className="required"
                   >
                   <Form.Label>Question Text</Form.Label>
                   <Form.Control
                       required
+                      placeholder="enter question here..."
                       type="text"
                       key="topicNameInputKey"
                       onBlur={questionTextHandler}
+                      name="questionText"
+                      value={field.questionText}
+                      onChange={e => handleChangeInput(i, e)}
                     />
                     
                   </Form.Group>
-    
-                  <Form.Group
+                </Form.Row>
+
+                <Form.Row>
+                <Form.Group
                     as={Col}
-                    sm={4}
+                    sm={11}
                     controlId="validationCustom01"
                     className="required"
                   >
                     <Form.Label>correct answer</Form.Label>
                     <Form.Control
                       required
+                      placeholder="enter correct answer..."
                       type="text"
                       key="topicNameInputKey"
                       onBlur={correctHandler}
-                    />
-                  </Form.Group>
-                      
-                  <Form.Group 
-                    as={Col} 
-                    sm={4}
-                    controlId="validationCustom01"
-                    className="required">
-                  <Form.Label>distractor1</Form.Label>
-                  <Form.Control
-                      required
-                      type="text"
-                      key="topicNameInputKey"
-                      onBlur={distractor1Handler}
+                      name="correctAnswer"
+                      value={field.correctAnswer}
+                      onChange={e => handleChangeInput(i, e)}
                     />
                   </Form.Group>
                 </Form.Row>
-                
-    
-                <Row>
-                  <Col sm={12}>
-                    <Form.Group className="required">
-                      <Form.Label>
-                        Teaser paragraph
-                        <OverlayTrigger
-                          key="right"
-                          placement="right"
-                          overlay={
-                            <Tooltip id="paragraphTooltip">
-                              Please enter 1-2 sentences about your Question Bank
-                            </Tooltip>
-                          }
-                        >
-                          <Button variant="secondary" className="circle-tooltip">
-                            ?
-                          </Button>
-                        </OverlayTrigger>
-                      </Form.Label>
-                      <Form.Control
-                        className={teaserValid ? "is-valid" : "is-invalid"}
-                        as="textarea"
-                        rows={10}
-                        required
-                        onBlur={teaserHandler}
-                      />
-                    </Form.Group>
-                  </Col>
-                </Row>
-                
-                <Row>
-                  <Col sm={12} className="asterix-caption">
-                    indicates required fields
-                  </Col>
-                </Row>
+                 
+                 <Form.Row>
+                  <Form.Group 
+                    as={Col} 
+                    sm={11}
+                    controlId="validationCustom01"
+                    className="required">
+                  <Form.Label>distractor 1</Form.Label>
+                  <Form.Control
+                      required
+                      placeholder="enter first distractor..."
+                      type="text"
+                      key="topicNameInputKey"
+                      onBlur={distractor1Handler}
+                      name="distractor1"
+                      value={field.distractor1}
+                      onChange={e => handleChangeInput(i, e)}
+                    />
+                  </Form.Group>
+                </Form.Row>
+              
+                <Form.Row>
+                  <Form.Group 
+                    as={Col} 
+                    sm={11}
+                    controlId="validationCustom01"
+                    className="required">
+                  <Form.Label>distractor 2</Form.Label>
+                  <Form.Control
+                      required
+                      placeholder="enter second distractor..."
+                      type="text"
+                      key="topicNameInputKey"
+                      onBlur={distractor2Handler}
+                      name="distractor2"
+                      value={field.distractor2}
+                      onChange={e => handleChangeInput(i, e)}
+                    />
+                  </Form.Group>
+                </Form.Row>
+                <Form.Row>
+                  <Form.Group 
+                    as={Col} 
+                    sm={11}
+                    controlId="validationCustom01"
+                    className="required">
+                  <Form.Label>distractor 3</Form.Label>
+                  <Form.Control
+                      required
+                      placeholder="enter third distractor..."
+                      type="text"
+                      key="topicNameInputKey"
+                      onBlur={distractor3Handler}
+                      name="distractor3"
+                      value={field.distractor3}
+                      onChange={e => handleChangeInput(i, e)}
+                    />
+                  </Form.Group>
+                </Form.Row>
                 <Row>&nbsp;</Row>
+                </div>
+                ))}
+
+
                 <Form.Row className="justify-content-md-right">
-                  <Form.Group as={Col} sm={10} className="float-right">
+                  <Form.Group as={Col} sm={3 } className="float-right">
+                    <Button
+                      onClick = {handleAdd}
+                      size="lg"
+                      className="float-right"
+                    >
+                      <i className = "fas fa-plus"></i>
+                    </Button>
+                  </Form.Group>
+                  <Form.Group as={Col} sm={3} className="float-right">
+                    <Button
+                      onClick = {handleSubtract}
+                      size="lg"
+                      className="float-right"
+                    >
+                      <i className = "fas fa-minus"></i>
+                    </Button>
+                  </Form.Group>
+                  <Form.Group as={Col} sm={3} className="float-right">
                     <Button
                       type="submit"
                       variant="primary"
                       size="lg"
                       className="float-right"
                     >
-                      Submit
+                      Submit  
                     </Button>
                   </Form.Group>
+
                 </Form.Row>
               </Form>
             </Container>
